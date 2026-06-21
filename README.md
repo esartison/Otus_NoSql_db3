@@ -434,8 +434,7 @@ rs.status().members.map(m => ({
    health: m.health
 }))
 ```
-<img width="775" height="206" alt="image" src="https://github.com/user-attachments/assets/2387d093-5606-4b4f-99b8-bdc5251e07fd" />
-
+<img width="715" height="207" alt="image" src="https://github.com/user-attachments/assets/2be3f81a-1ca8-47fb-b052-07495589fd9e" />
 
 
 # mongodb3 # port 27023
@@ -463,4 +462,252 @@ rs.status().members.map(m => ({
 }))
 ```
 <img width="713" height="212" alt="image" src="https://github.com/user-attachments/assets/9e641755-5245-4d17-8065-e7d4a9d22097" />
+
+
+## (5) конфигурация MONGOS ##
+
+На сервере mongosserver coздать конфиг файл
+```
+cat <<'EOF' > /etc/mongos.conf
+systemLog:
+  destination: file
+  logAppend: true
+  path: /var/log/mongodb/mongos.log
+
+net:
+  port: 27017
+  bindIp: 0.0.0.0
+
+sharding:
+  configDB: configsvr/mongodb1:27020,mongodb2:27020,mongodb3:27020
+EOF
+```
+
+
+создать systemd service:
+```
+cat <<'EOF' > /etc/systemd/system/mongos.service
+[Unit]
+Description=MongoDB Database Server
+Documentation=https://docs.mongodb.org/manual
+After=network.target
+
+[Service]
+User=root
+Group=root
+ExecStart=/usr/bin/mongos --config /etc/mongos.conf
+PIDFile=/var/run/mongodb/mongos.pid
+# file size
+LimitFSIZE=infinity
+# cpu time
+LimitCPU=infinity
+# virtual memory size
+LimitAS=infinity
+# open files
+LimitNOFILE=64000
+# processes/threads
+LimitNPROC=64000
+# locked memory
+LimitMEMLOCK=infinity
+# total threads (user+kernel)
+TasksMax=infinity
+TasksAccounting=false
+
+# Recommended limits for for mongod as specified in
+# http://docs.mongodb.org/manual/reference/ulimit/#recommended-settings
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+Запустить службу
+
+>systemctl daemon-reload
+
+>systemctl enable  mongos.service
+
+>systemctl start  mongos.service
+
+>systemctl status  mongos.service
+<img width="755" height="187" alt="image" src="https://github.com/user-attachments/assets/1e67bab7-f90a-4355-806b-beb191f7035c" />
+
+
+добавить шарды в кластер на сервере mongosserver
+> mongosh --port 27017
+
+>sh.addShard("shardsvr-01/mongodb1:27021")
+>sh.addShard("shardsvr-02/mongodb2:27022")
+>sh.addShard("shardsvr-03/mongodb3:27023")
+
+>sh.status()
+```
+[direct: mongos] test> sh.status()
+shardingVersion
+{ _id: 1, clusterId: ObjectId('6a3810670b32382b37e4417a') }
+---
+shards
+[
+  {
+    _id: 'shardsvr-01',
+    host: 'shardsvr-01/mongodb1:27021,mongodb2:27021,mongodb3:27021',
+    state: 1,
+    topologyTime: Timestamp({ t: 1782063683, i: 4 }),
+    replSetConfigVersion: Long('-1')
+  },
+  {
+    _id: 'shardsvr-02',
+    host: 'shardsvr-02/mongodb2:27022,mongodb1:27022,mongodb3:27022',
+    state: 1,
+    topologyTime: Timestamp({ t: 1782063693, i: 9 }),
+    replSetConfigVersion: Long('-1')
+  },
+  {
+    _id: 'shardsvr-03',
+    host: 'shardsvr-03/mongodb3:27023,mongodb1:27023,mongodb2:27023',
+    state: 1,
+    topologyTime: Timestamp({ t: 1782063702, i: 9 }),
+    replSetConfigVersion: Long('-1')
+  }
+]
+---
+active mongoses
+[ { '8.0.26': 1 } ]
+---
+autosplit
+{ 'Currently enabled': 'yes' }
+---
+balancer
+{
+  'Currently enabled': 'yes',
+  'Failed balancer rounds in last 5 attempts': 0,
+  'Currently running': 'no',
+  'Migration Results for the last 24 hours': 'No recent migrations'
+}
+---
+shardedDataDistribution
+[]
+---
+databases
+[
+  {
+    database: { _id: 'config', primary: 'config', partitioned: true },
+    collections: {}
+  }
+]
+```
+
+
+## (6) выставить приоритет шардам на сервере mongosserver ##
+
+# shardsvr-01 #
+на сервере mongodb1
+
+подключиться к shardsvr-01
+mongosh --port 27021
+> rs.conf().members.map(m => ({ _id: m._id, host: m.host }))
+<img width="1170" height="136" alt="image" src="https://github.com/user-attachments/assets/14489803-ac6e-45e1-a3d8-b138e92cdda7" />
+
+настроить mongodb1 как главный узел
+>cfg = rs.conf()
+>cfg.members[0].priority = 2   // primary priority
+>cfg.members[1].priority = 1
+>cfg.members[2].priority = 1
+>rs.reconfig(cfg)
+>rs.stepDown()
+>rs.conf().members.forEach(m => print(m.host + " → priority: " + m.priority))
+<img width="1147" height="85" alt="image" src="https://github.com/user-attachments/assets/8d597e06-165d-4433-a652-fde98b504ce6" />
+
+
+
+
+# shardsvr-02 #
+на сервере mongodb2
+
+подключиться к shardsvr-02
+mongosh --port 27022
+> rs.conf().members.map(m => ({ _id: m._id, host: m.host }))
+<img width="952" height="140" alt="image" src="https://github.com/user-attachments/assets/b5808c40-8858-4aab-9ebf-58ad8efd12fc" />
+
+>rs.conf().members.forEach(m => print(m.host + " → priority: " + m.priority))
+<img width="1122" height="89" alt="image" src="https://github.com/user-attachments/assets/8d3a0d63-6dee-4e09-b4e5-42e2c404ce0c" />
+
+настроить mongodb2 как главный узел
+>cfg = rs.conf()
+>cfg.members[0].priority = 1   // primary priority
+>cfg.members[1].priority = 2
+>cfg.members[2].priority = 1
+>rs.reconfig(cfg)
+>rs.stepDown()
+>rs.conf().members.forEach(m => print(m.host + " → priority: " + m.priority))
+<img width="1151" height="76" alt="image" src="https://github.com/user-attachments/assets/1f63dd80-3e39-40d8-ab00-f1e5aa9c769b" />
+
+
+
+# shardsvr-03 #
+на сервере mongodb3
+
+подключиться к shardsvr-03
+mongosh --port 27023
+> rs.conf().members.map(m => ({ _id: m._id, host: m.host }))
+<img width="939" height="141" alt="image" src="https://github.com/user-attachments/assets/353255a0-f34e-46d9-8bf9-cb432fb7513b" />
+
+>rs.conf().members.forEach(m => print(m.host + " → priority: " + m.priority))
+<img width="1145" height="116" alt="image" src="https://github.com/user-attachments/assets/25117c24-9820-41e7-bc7c-8e4c5938845d" />
+
+настроить mongodb3 как главный узел
+>cfg = rs.conf()
+>cfg.members[0].priority = 1   // primary priority
+>cfg.members[1].priority = 1
+>cfg.members[2].priority = 2
+>rs.reconfig(cfg)
+>rs.stepDown()
+>rs.conf().members.forEach(m => print(m.host + " → priority: " + m.priority))
+<img width="1158" height="90" alt="image" src="https://github.com/user-attachments/assets/165f4995-557b-44ae-81b8-92b2dfe1dbc7" />
+
+## (7) создание базы и настройка шардирования для коллекции ##
+
+с сервера mongosserver подключиться к базе
+>mongosh --port 27017
+
+создать базы sales и коллекцию orders
+>use sales
+>db.createCollection("orders")
+
+включение шардирования на уровне базы
+>sh.enableSharding("sales")
+<img width="709" height="253" alt="image" src="https://github.com/user-attachments/assets/f5653ec0-1d74-487b-ac9b-58698516efcf" />
+
+включение шардирования на уровне коллекции по полю orderid и алгоритмом HASH
+>sh.shardCollection("sales.orders", { orderId: "hashed" });
+<img width="848" height="269" alt="image" src="https://github.com/user-attachments/assets/73cb1c64-6ca4-4667-a47c-15e520ffd0df" />
+
+сделать тестовую вставку в шардированную коллекцию
+```
+let bulk = [];
+const totalDocs = 1_000_000;     // total number of documents to insert
+const batchSize = 20_000;        // larger batch size reduces round-trips
+
+for (let i = 0; i < totalDocs; i++) {
+  bulk.push({
+    orderId: i,
+    orderDate: new Date(2000 + (i % 20), 0, 1),
+    amount: Math.floor(Math.random() * 1000)
+  });
+
+  if (bulk.length === batchSize) {
+    db.orders.insertMany(bulk, { ordered: false });  // unordered insert
+    bulk = [];
+  }
+}
+
+// Insert the remaining documents
+if (bulk.length > 0) {
+  db.orders.insertMany(bulk, { ordered: false });
+}
+
+print(`✅ Successfully inserted ${totalDocs} documents into sales.orders`);
+```
+<img width="1007" height="81" alt="image" src="https://github.com/user-attachments/assets/5c60d4d4-0ee2-4f29-b377-36d3dc4e046e" />
+
 
