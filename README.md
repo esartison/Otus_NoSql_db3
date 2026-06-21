@@ -711,3 +711,71 @@ print(`✅ Successfully inserted ${totalDocs} documents into sales.orders`);
 <img width="1007" height="81" alt="image" src="https://github.com/user-attachments/assets/5c60d4d4-0ee2-4f29-b377-36d3dc4e046e" />
 
 
+Проверрить, была ли таблица вообще шардирована
+>use config
+>db.collections.find({ _id: "sales.orders" }).pretty()
+<img width="855" height="309" alt="image" src="https://github.com/user-attachments/assets/d4a71a19-afba-4079-a136-56651a8022a5" />
+
+Проверить как данные распределены между шардами
+> use sales
+> db.orders.getShardDistribution()
+```
+[direct: mongos] sales> db.orders.getShardDistribution()
+Shard shardsvr-02 at shardsvr-02/mongodb1:27022,mongodb2:27022,mongodb3:27022
+{
+  data: '21.01MiB',
+  docs: 333819,
+  chunks: 1,
+  'estimated data per chunk': '21.01MiB',
+  'estimated docs per chunk': 333819
+}
+---
+Shard shardsvr-03 at shardsvr-03/mongodb1:27023,mongodb2:27023,mongodb3:27023
+{
+  data: '21.01MiB',
+  docs: 333951,
+  chunks: 1,
+  'estimated data per chunk': '21.01MiB',
+  'estimated docs per chunk': 333951
+}
+---
+Shard shardsvr-01 at shardsvr-01/mongodb1:27021,mongodb2:27021,mongodb3:27021
+{
+  data: '20.91MiB',
+  docs: 332230,
+  chunks: 1,
+  'estimated data per chunk': '20.91MiB',
+  'estimated docs per chunk': 332230
+}
+---
+Totals
+{
+  data: '62.94MiB',
+  docs: 1000000,
+  chunks: 3,
+  'Shard shardsvr-02': [
+    '33.38 % data',
+    '33.38 % docs in cluster',
+    '66B avg obj size on shard'
+  ],
+  'Shard shardsvr-03': [
+    '33.39 % data',
+    '33.39 % docs in cluster',
+    '66B avg obj size on shard'
+  ],
+  'Shard shardsvr-01': [
+    '33.22 % data',
+    '33.22 % docs in cluster',
+    '66B avg obj size on shard'
+  ]
+}
+[direct: mongos] sales> 
+```
+Шардирование работает, данные распределены между шардами.
+
+
+## (8) поронять разные инстансы, посмотреть, что будет происходить, поднять обратно. Описать что произошло ##
+
+## (9) настроить аутентификацию и многоролевой доступ ##
+
+https://maihoangviet.medium.com/hardening-an-existing-mongodb-sharded-cluster-with-keyfile-authentication-20944afd13b1
