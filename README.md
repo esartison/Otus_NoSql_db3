@@ -218,6 +218,7 @@ WantedBy=multi-user.target
 EOF
 ```
 перезапустить сервис
+
 >systemctl daemon-reload
 >systemctl enable shardsvr-01.service
 >systemctl start shardsvr-01.service
@@ -287,6 +288,7 @@ EOF
 ```
 
 перезапустить сервис
+
 >systemctl daemon-reload
 >systemctl enable shardsvr-02.service
 >systemctl start shardsvr-02.service
@@ -359,6 +361,7 @@ EOF
 
 
 перезапустить сервис
+
 >systemctl daemon-reload
 >systemctl enable shardsvr-03.service
 >systemctl start shardsvr-03.service
