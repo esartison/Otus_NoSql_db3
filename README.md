@@ -157,7 +157,8 @@ shardsvr-02 → port 27022
 shardsvr-03 → port 27023
 ```
 
-#shardsvr-01#
+# shardsvr-01 #
+
 создать конфиги на всех 3х серверах mongodb[1-3]
 ```
 cat <<'EOF' > /etc/shardsvr-01.conf
@@ -224,7 +225,8 @@ EOF
 <img width="925" height="231" alt="image" src="https://github.com/user-attachments/assets/97c70c7a-c796-4137-9d6e-16fe6f289e83" />
 
 
-#shardsvr-02#
+# shardsvr-02 #
+
 создать конфиги на всех 3х серверах mongodb[1-3]
 ```
 cat <<'EOF' > /etc/shardsvr-02.conf
@@ -293,7 +295,8 @@ EOF
 
 
 
-#shardsvr-03#
+# shardsvr-03 #
+
 создать конфиги на всех 3х серверах mongodb[1-3]
 ```
 cat <<'EOF' > /etc/shardsvr-03.conf
