@@ -381,7 +381,7 @@ EOF
 
 ## (5) инициализировать реплики ##
 
-#mongodb1# port 27021
+# mongodb1 # port 27021
 
 >mongosh --port 27021
 
@@ -410,7 +410,57 @@ rs.status().members.map(m => ({
 
 
 
-#mongodb2# port 27022
+# mongodb2 # port 27022
 
+>mongosh --port 27022
+
+Инициализация реплик
+```
+rs.initiate({
+  _id: "shardsvr-02",
+  members: [
+    { _id: 0, host: "mongodb1:27022" },
+    { _id: 1, host: "mongodb2:27022" },
+    { _id: 2, host: "mongodb3:27022" }
+  ]
+})
+```
+
+Првоерка статуса
+```
+rs.status().members.map(m => ({
+   name: m.name,
+   stateStr: m.stateStr,
+   health: m.health
+}))
+```
+<img width="775" height="206" alt="image" src="https://github.com/user-attachments/assets/2387d093-5606-4b4f-99b8-bdc5251e07fd" />
+
+
+
+# mongodb3 # port 27023
 #mongodb3# port 27023
+>mongosh --port 27023
+
+Инициализация реплик
+```
+rs.initiate({
+  _id: "shardsvr-03",
+  members: [
+    { _id: 0, host: "mongodb1:27023" },
+    { _id: 1, host: "mongodb2:27023" },
+    { _id: 2, host: "mongodb3:27023" }
+  ]
+})
+```
+
+Првоерка статуса
+```
+rs.status().members.map(m => ({
+   name: m.name,
+   stateStr: m.stateStr,
+   health: m.health
+}))
+```
+<img width="713" height="212" alt="image" src="https://github.com/user-attachments/assets/9e641755-5245-4d17-8065-e7d4a9d22097" />
 
