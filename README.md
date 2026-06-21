@@ -220,9 +220,13 @@ EOF
 перезапустить сервис
 
 >systemctl daemon-reload
+
 >systemctl enable shardsvr-01.service
+
 >systemctl start shardsvr-01.service
+
 >systemctl status shardsvr-01.service
+
 <img width="925" height="231" alt="image" src="https://github.com/user-attachments/assets/97c70c7a-c796-4137-9d6e-16fe6f289e83" />
 
 
@@ -290,9 +294,13 @@ EOF
 перезапустить сервис
 
 >systemctl daemon-reload
+
 >systemctl enable shardsvr-02.service
+
 >systemctl start shardsvr-02.service
+
 >systemctl status shardsvr-02.service
+
 <img width="926" height="229" alt="image" src="https://github.com/user-attachments/assets/43614557-6b1c-42d4-85bf-739d3b690c39" />
 
 
@@ -363,8 +371,11 @@ EOF
 перезапустить сервис
 
 >systemctl daemon-reload
+
 >systemctl enable shardsvr-03.service
+
 >systemctl start shardsvr-03.service
+
 >systemctl status shardsvr-03.service
 
 
