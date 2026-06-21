@@ -157,8 +157,8 @@ shardsvr-02 → port 27022
 shardsvr-03 → port 27023
 ```
 
-#mongodb1#
-создать конфиги
+#shardsvr-01#
+создать конфиги на всех 3х серверах mongodb[1-3]
 ```
 cat <<'EOF' > /etc/shardsvr-01.conf
 storage:
@@ -224,8 +224,8 @@ EOF
 <img width="925" height="231" alt="image" src="https://github.com/user-attachments/assets/97c70c7a-c796-4137-9d6e-16fe6f289e83" />
 
 
-#mongodb2#
-создать конфиги
+#shardsvr-02#
+создать конфиги на всех 3х серверах mongodb[1-3]
 ```
 cat <<'EOF' > /etc/shardsvr-02.conf
 storage:
@@ -292,8 +292,9 @@ EOF
 <img width="926" height="229" alt="image" src="https://github.com/user-attachments/assets/43614557-6b1c-42d4-85bf-739d3b690c39" />
 
 
-#mongodb3#
-создать конфиги
+
+#shardsvr-03#
+создать конфиги на всех 3х серверах mongodb[1-3]
 ```
 cat <<'EOF' > /etc/shardsvr-03.conf
 storage:
@@ -363,9 +364,36 @@ EOF
 
 ## (5) инициализировать реплики ##
 
-#mongodb1#
+#mongodb1# port 27021
 
-#mongodb2#
+>mongosh --port 27021
 
-#mongodb3#
+Инициализация реплик
+```
+rs.initiate({
+  _id: "shardsvr-01",
+  members: [
+    { _id: 0, host: "mongodb1:27021" },
+    { _id: 1, host: "mongodb2:27021" },
+    { _id: 2, host: "mongodb3:27021" }
+  ]
+})
+```
+
+Првоерка статуса
+```
+rs.status().members.map(m => ({
+   name: m.name,
+   stateStr: m.stateStr,
+   health: m.health
+}))
+```
+<img width="727" height="210" alt="image" src="https://github.com/user-attachments/assets/2ee618d5-51b3-4c86-89a4-c4ebdb3ab18b" />
+
+
+
+
+#mongodb2# port 27022
+
+#mongodb3# port 27023
 
