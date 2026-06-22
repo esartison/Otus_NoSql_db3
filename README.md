@@ -17,11 +17,6 @@
 Используем подход по схеме, у нас 4 VM и на каждом из сервере бежить по одному мастер shard экземляра и 2 реплики других шардов
 <img width="1100" height="1132" alt="image" src="https://github.com/user-attachments/assets/2f9d9c94-ee93-475d-ad6d-ab439c09e1e3" />
 
-Host name	IP	Service name	Port	Config file path	Data path	Log path
-mongodb1	192.168.0.20	shardsvr-01	27020	/etc/shardsvr.conf	/data/mongodb/data/shardsvr-01	/data/mongodb/log/shardsvr-01.log
-mongodb2	192.168.0.21	shardsvr-02	27021	/etc/shardsvr.conf	/data/mongodb/data/shardsvr-02	/data/mongodb/log/shardsvr-02.log
-mongodb3	192.168.0.22	shardsvr-03	27022	/etc/shardsvr.conf	/data/mongodb/data/shardsvr-03	/data/mongodb/log/shardsvr-03.log
-MONGOS-SERVER	192.168.0.23	mongos	27017	/etc/mongos.conf	/var/log/mongodb/mongos.log	/var/log/mongodb/mongos.log
 <img width="1124" height="121" alt="image" src="https://github.com/user-attachments/assets/55ba10fd-f000-4884-a7d4-3e398a9d3801" />
 
 Развернул локально 4 виртуальные машины
