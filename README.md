@@ -15,7 +15,7 @@
 ## (1) описание подхода #
 
 Используем подход по схеме, у нас 4 VM и на каждом из сервере бежить по одному мастер shard экземляра и 2 реплики других шардов
-<img width="1100" height="1132" alt="image" src="https://github.com/user-attachments/assets/1427eab5-0a62-44b9-be9b-e3c2e03f1ef7" />
+<img width="1100" height="1132" alt="image" src="https://github.com/user-attachments/assets/2f9d9c94-ee93-475d-ad6d-ab439c09e1e3" />
 
 Развернул локально 4 виртуальные машины
 ```
