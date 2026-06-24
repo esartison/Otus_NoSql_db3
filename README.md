@@ -800,15 +800,18 @@ rs.status().members.map(m => ({
 
 
 Остановил/выключил сервер mongodb2(shardsvr-02)
+
 <img width="770" height="232" alt="image" src="https://github.com/user-attachments/assets/93c79e43-678b-409e-9eaa-f031386accf9" />
 
 
 ПОСЛЕ
+
 <img width="729" height="267" alt="image" src="https://github.com/user-attachments/assets/4933e70d-c169-4b2f-8cb1-b362d7b5da6c" />
 Primary переехал на первую голову
 
 
-запустил сервер mongodb2 и проверил еще раз статус, primary опять вернулся на mongodb2
+ЗАПУСТИЛ сервер mongodb2 и проверил еще раз статус, primary опять вернулся на mongodb2
+
 <img width="754" height="235" alt="image" src="https://github.com/user-attachments/assets/b6a594fc-ec3e-4fc2-b334-4dcf04ab866d" />
 
 Все отработал как и положено. 
