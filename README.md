@@ -1036,8 +1036,62 @@ security:
 > systemctl start mongos.service
 <img width="853" height="174" alt="image" src="https://github.com/user-attachments/assets/d0e37c28-9c0e-4085-970a-aec16ec32499" />
 
+подключиться к базе с  и создать административных пользователей
+> mongosh --port 27017
+
+```
+admin = db.getSiblingDB("admin")
+admin.createUser(
+  {
+    user: "mongos_admin",
+    pwd:  "mongos_admin",
+    roles: [ { role: "userAdminAnyDatabase", db: "admin" } ]
+  }
+)
+```
+<img width="760" height="391" alt="image" src="https://github.com/user-attachments/assets/3bfe8028-d9f4-4349-9779-3d7655d53e69" />
+
+попробовать подключиться под админской учеткой
+> mongosh --port 27017 -u mongos_admin -p mongos_admin --authenticationDatabase "admin"
+<img width="1603" height="171" alt="image" src="https://github.com/user-attachments/assets/511a6b8c-409b-49e6-85df-76c564f2b75e" />
 
 
+создать пользователя для управления кластером
+```
+admin = db.getSiblingDB("admin")
+admin.createUser(
+  {
+    user: "admin",
+    pwd:  "admin",
+    roles: [ { role: "clusterAdmin", db: "admin" } ]
+  }
+)
+```
+
+>mongosh --port 27017 -u admin -p admin --authenticationDatabase "admin"
+<img width="1550" height="276" alt="image" src="https://github.com/user-attachments/assets/32f03fb3-8884-4e5b-af77-64f3cde8b352" />
 
 
-https://maihoangviet.medium.com/hardening-an-existing-mongodb-sharded-cluster-with-keyfile-authentication-20944afd13b1
+создать супер-пользователя
+```
+admin = db.getSiblingDB("admin")
+admin.createUser(
+  {
+    user: "root",
+    pwd:  "root",
+    roles: [ { role: "root", db: "admin" } ]
+  }
+)
+```
+
+> mongosh --port 27017 -u root -p root --authenticationDatabase "admin"
+
+
+Запустить балансер
+> mongosh --port 27017 -u admin -p admin --authenticationDatabase "admin" -eval 'sh.startBalancer()'
+> mongosh --port 27017 -u admin -p admin --authenticationDatabase "admin" -eval 'sh.getBalancerState()'
+
+<img width="1310" height="290" alt="image" src="https://github.com/user-attachments/assets/3890353b-c8e6-4844-b1fc-adc2776aebe6" />
+
+Все настроили и все работает. 
+
