@@ -743,11 +743,13 @@ print(`✅ Successfully inserted ${totalDocs} documents into sales.orders`);
 
 Проверить, была ли таблица вообще шардирована - все хорошо
 >use config
+>
 >db.collections.find({ _id: "sales.orders" }).pretty()
 <img width="855" height="309" alt="image" src="https://github.com/user-attachments/assets/d4a71a19-afba-4079-a136-56651a8022a5" />
 
 Проверить как данные распределены между шардами
 > use sales
+
 > db.orders.getShardDistribution()
 ```
 [direct: mongos] sales> db.orders.getShardDistribution()
