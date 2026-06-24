@@ -17,8 +17,6 @@
 Используем подход по схеме, у нас 4 VM и на каждом из сервере бежить по одному мастер shard экземляра и 2 реплики других шардов
 <img width="1100" height="1132" alt="image" src="https://github.com/user-attachments/assets/2f9d9c94-ee93-475d-ad6d-ab439c09e1e3" />
 
-<img width="1124" height="121" alt="image" src="https://github.com/user-attachments/assets/55ba10fd-f000-4884-a7d4-3e398a9d3801" />
-
 Развернул локально 4 виртуальные машины
 ```
 192.168.0.20 mongodb1
@@ -159,7 +157,7 @@ shardsvr-02 → port 27022
 shardsvr-03 → port 27023
 ```
 
-# shardsvr-01 #
+**shardsvr-01**
 
 создать конфиги на всех 3х серверах mongodb[1-3]
 ```
@@ -232,7 +230,7 @@ EOF
 <img width="925" height="231" alt="image" src="https://github.com/user-attachments/assets/97c70c7a-c796-4137-9d6e-16fe6f289e83" />
 
 
-# shardsvr-02 #
+**shardsvr-02**
 
 создать конфиги на всех 3х серверах mongodb[1-3]
 ```
@@ -307,7 +305,7 @@ EOF
 
 
 
-# shardsvr-03 #
+**shardsvr-03**
 
 создать конфиги на всех 3х серверах mongodb[1-3]
 ```
@@ -383,7 +381,7 @@ EOF
 
 ## (5) инициализировать реплики ##
 
-# mongodb1 # port 27021
+**mongodb1 port 27021**
 
 >mongosh --port 27021
 
@@ -412,7 +410,7 @@ rs.status().members.map(m => ({
 
 
 
-# mongodb2 # port 27022
+**mongodb2 port 27022**
 
 >mongosh --port 27022
 
@@ -439,7 +437,7 @@ rs.status().members.map(m => ({
 <img width="715" height="207" alt="image" src="https://github.com/user-attachments/assets/2be3f81a-1ca8-47fb-b052-07495589fd9e" />
 
 
-# mongodb3 # port 27023
+**mongodb3 port 27023**
 #mongodb3# port 27023
 >mongosh --port 27023
 
@@ -539,8 +537,11 @@ EOF
 > mongosh --port 27017
 
 >sh.addShard("shardsvr-01/mongodb1:27021")
+
 >sh.addShard("shardsvr-02/mongodb2:27022")
+
 >sh.addShard("shardsvr-03/mongodb3:27023")
+>
 
 >sh.status()
 ```
