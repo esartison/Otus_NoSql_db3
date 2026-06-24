@@ -115,9 +115,13 @@ WantedBy=multi-user.target
 EOF
 ```
 >systemctl daemon-reload
+
 >systemctl enable configsvr.service
+
 >systemctl start configsvr.service
+
 >systemctl status configsvr.service
+
 <img width="1893" height="252" alt="image" src="https://github.com/user-attachments/assets/064c8552-0459-410c-912b-a4580f3d36b2" />
 
 на mongodb1 выполнить
