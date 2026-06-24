@@ -1026,6 +1026,17 @@ admin.createUser(
 <img width="1470" height="175" alt="image" src="https://github.com/user-attachments/assets/76a1d286-c953-439e-814f-06493b4fd859" />
 
 
+** настройка Mongos с Keyfile**
+на сервере mongosserver поправить /etc/mongos.conf и добавить
+```
+security:
+  keyFile: /etc/mongodb-keyfile
+```
+
+> systemctl start mongos.service
+<img width="853" height="174" alt="image" src="https://github.com/user-attachments/assets/d0e37c28-9c0e-4085-970a-aec16ec32499" />
+
+
 
 
 
