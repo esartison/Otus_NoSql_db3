@@ -659,12 +659,19 @@ mongosh --port 27023
 
 настроить mongodb3 как главный узел
 >cfg = rs.conf()
->cfg.members[0].priority = 1   // primary priority
+
+>cfg.members[0].priority = 1  
+
 >cfg.members[1].priority = 1
+
 >cfg.members[2].priority = 2
+
 >rs.reconfig(cfg)
+
 >rs.stepDown()
+
 >rs.conf().members.forEach(m => print(m.host + " → priority: " + m.priority))
+
 <img width="1158" height="90" alt="image" src="https://github.com/user-attachments/assets/165f4995-557b-44ae-81b8-92b2dfe1dbc7" />
 
 ## (7) создание базы и настройка шардирования для коллекции ##
