@@ -1089,6 +1089,7 @@ admin.createUser(
 
 Запустить балансер
 > mongosh --port 27017 -u admin -p admin --authenticationDatabase "admin" -eval 'sh.startBalancer()'
+
 > mongosh --port 27017 -u admin -p admin --authenticationDatabase "admin" -eval 'sh.getBalancerState()'
 
 <img width="1310" height="290" alt="image" src="https://github.com/user-attachments/assets/3890353b-c8e6-4844-b1fc-adc2776aebe6" />
