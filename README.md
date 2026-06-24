@@ -685,10 +685,12 @@ mongosh --port 27023
 
 включение шардирования на уровне базы
 >sh.enableSharding("sales")
+>
 <img width="709" height="253" alt="image" src="https://github.com/user-attachments/assets/f5653ec0-1d74-487b-ac9b-58698516efcf" />
 
 включение шардирования на уровне коллекции по полю orderid и алгоритмом HASH
 >sh.shardCollection("sales.orders", { orderId: "hashed" });
+>
 <img width="848" height="269" alt="image" src="https://github.com/user-attachments/assets/73cb1c64-6ca4-4667-a47c-15e520ffd0df" />
 
 сделать тестовую вставку в шардированную коллекцию
@@ -784,6 +786,33 @@ Totals
 
 
 ## (8) поронять разные инстансы, посмотреть, что будет происходить, поднять обратно. Описать что произошло ##
+с mongodb3 подключился к shardsvr-02 и проверил статус 
+
+ДО
+```
+rs.status().members.map(m => ({
+   name: m.name,
+   stateStr: m.stateStr,
+   health: m.health
+}))
+```
+<img width="711" height="288" alt="image" src="https://github.com/user-attachments/assets/9223fef5-e340-46d2-9463-551016fb9953" />
+
+
+Остановил/выключил сервер mongodb2(shardsvr-02)
+<img width="770" height="232" alt="image" src="https://github.com/user-attachments/assets/93c79e43-678b-409e-9eaa-f031386accf9" />
+
+
+ПОСЛЕ
+<img width="729" height="267" alt="image" src="https://github.com/user-attachments/assets/4933e70d-c169-4b2f-8cb1-b362d7b5da6c" />
+Primary переехал на первую голову
+
+
+запустил сервер mongodb2 и проверил еще раз статус, primary опять вернулся на mongodb2
+<img width="754" height="235" alt="image" src="https://github.com/user-attachments/assets/b6a594fc-ec3e-4fc2-b334-4dcf04ab866d" />
+
+Все отработал как и положено. 
+
 
 ## (9) настроить аутентификацию и многоролевой доступ ##
 
