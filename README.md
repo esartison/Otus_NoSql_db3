@@ -840,5 +840,193 @@ Primary переехал на первую голову
 
 
 ## (9) настроить аутентификацию и многоролевой доступ ##
+На сейчас мы можем подключиться к базе безпарольно и никакая аутентификация не нужна.
+
+## Keyfile Authentication ##
+Настороить аутентификацию между нодами, чтобы только доверенные узлы могли подключиться к кластеру
+
+на сервере mongodb1 создать сертфикат\ключ
+```
+openssl rand -base64 756 > /etc/mongodb-keyfile
+chmod 400 /etc/mongodb-keyfile
+chown mongodb /etc/mongodb-keyfile
+```
+<img width="661" height="53" alt="image" src="https://github.com/user-attachments/assets/5f8e9c78-8255-48f6-972a-785b7f7bd1ed" />
+
+скоприровать ключ на оставшиеся ноды кластера
+```
+scp -p /etc/mongodb-keyfile root@mongodb2:/etc/mongodb-keyfile
+scp -p /etc/mongodb-keyfile root@mongodb3:/etc/mongodb-keyfile
+scp -p /etc/mongodb-keyfile root@mongosserver:/etc/mongodb-keyfile
+```
+
+с сервера mongosserver отключить балансер
+> mongosh --port 27017
+
+> [direct: mongos] test> sh.getBalancerState()
+<img width="450" height="40" alt="image" src="https://github.com/user-attachments/assets/5335f46c-5018-4ad7-8c86-7339885a5c43" />
+
+остановить балансер
+>sh.stopBalancer()
+<img width="778" height="276" alt="image" src="https://github.com/user-attachments/assets/fa110d75-2efb-43d2-b6d4-797bf5bcd186" />
+
+на сервере mongosserver остановить mongos
+> mongosh --port 27017 -eval 'db.getSiblingDB("admin").shutdownServer()'
+
+
+остановить Config Server в таком порядке mongodb2, mongodb3 и mongodb1
+> mongosh --port 27020 -eval 'db.getSiblingDB("admin").shutdownServer()'
+
+**остановить seconday shard-ы(реплики)**
+На mongodb1, остановить shardsvr-03 и shardsvr-02:
+> mongosh --port 27023 -eval 'db.getSiblingDB("admin").shutdownServer()'
+
+> mongosh --port 27022 -eval 'db.getSiblingDB("admin").shutdownServer()'
+
+
+На mongodb2, остановить  shardsvr-03 и shardsvr-01:
+> mongosh --port 27023 -eval 'db.getSiblingDB("admin").shutdownServer()'
+
+> mongosh --port 27021 -eval 'db.getSiblingDB("admin").shutdownServer()'
+
+
+На mongodb3, остановить  shardsvr-02 и shardsvr-01:
+> mongosh --port 27022 -eval 'db.getSiblingDB("admin").shutdownServer()'
+
+> mongosh --port 27021 -eval 'db.getSiblingDB("admin").shutdownServer()'
+
+
+
+**Остановить Primary Shard**
+
+На mongodb1
+> mongosh --port 27021 -eval 'db.getSiblingDB("admin").shutdownServer()'
+
+На mongodb2
+> mongosh --port 27022 -eval 'db.getSiblingDB("admin").shutdownServer()'
+
+На mongodb3
+> mongosh --port 27023 -eval 'db.getSiblingDB("admin").shutdownServer()'
+
+
+Добавить mongodb-keyfile в /etc/configsvr.conf на серверах mongodb[1-3]
+```
+tee /etc/configsvr.conf <<'EOF'
+sharding:
+   clusterRole: configsvr
+
+replication:
+   replSetName: configsvr
+
+systemLog:
+   destination: file
+   path: /data/mongodb/log/configsvr.log
+   logAppend: true
+
+storage:
+   dbPath: /data/mongodb/data/configsvr
+
+net:
+   bindIp: 0.0.0.0
+   port: 27020
+
+setParameter:
+   enableLocalhostAuthBypass: false
+
+security:
+   keyFile: /etc/mongodb-keyfile
+EOF
+```
+
+
+Запустить configsvr сервис  на серверах mongodb[1-3]
+```
+systemctl start configsvr.service
+systemctl status configsvr.service
+```
+<img width="926" height="251" alt="image" src="https://github.com/user-attachments/assets/ca68d696-820e-4d1c-8d85-f37d24a76815" />
+
+
+**добавление конфига в shard-ы**
+на серверах mongodb[1-3] в файлы shardsvr-0[1-3].conf добавить 
+```
+security:
+  keyFile: /etc/mongodb-keyfile
+```
+запустить сервисы
+> systemctl daemon-reload
+
+> systemctl start shardsvr-01.service
+
+> systemctl start shardsvr-02.service
+
+> systemctl start shardsvr-03.service
+<img width="921" height="238" alt="image" src="https://github.com/user-attachments/assets/32bffc2e-a940-4ced-86b0-a2f50f34a95e" />
+
+**создание админского пользователя**
+на mongodb1, подключиться к shardsvr-01
+mongosh --port 27021
+создать пользователя
+```
+admin = db.getSiblingDB("admin")
+admin.createUser(
+  {
+    user: "shard1_admin",
+    pwd: "shard1_admin",
+    roles: [{ role: "userAdminAnyDatabase", db: "admin" }]
+   }
+)
+```
+<img width="774" height="361" alt="image" src="https://github.com/user-attachments/assets/acb6b919-0b8e-43ba-a57c-f5adfc7a5c2f" />
+
+попробовать подключиться по паролю
+ > mongosh --port 27021 -u shard1_admin -p shard1_admin
+<img width="1392" height="170" alt="image" src="https://github.com/user-attachments/assets/1f02dbab-051f-44ff-842c-f31397dd52ad" />
+
+
+
+
+на mongodb2, подключиться к shardsvr-02
+mongosh --port 27022
+создать пользователя
+```
+admin = db.getSiblingDB("admin")
+admin.createUser(
+  {
+    user: "shard1_admin",
+    pwd: "shard1_admin",
+    roles: [{ role: "userAdminAnyDatabase", db: "admin" }]
+   }
+)
+```
+<img width="728" height="377" alt="image" src="https://github.com/user-attachments/assets/724c95b2-0442-4e14-af56-72d99569a251" />
+
+попробовать подключиться по паролю
+ > mongosh --port 27022 -u shard1_admin -p shard1_admin
+<img width="1427" height="173" alt="image" src="https://github.com/user-attachments/assets/5b5ef31d-1b19-4bd0-8aff-ab3d11e4410d" />
+
+
+на mongodb3, подключиться к shardsvr-03
+mongosh --port 27023
+создать пользователя
+```
+admin = db.getSiblingDB("admin")
+admin.createUser(
+  {
+    user: "shard1_admin",
+    pwd: "shard1_admin",
+    roles: [{ role: "userAdminAnyDatabase", db: "admin" }]
+   }
+)
+```
+<img width="838" height="385" alt="image" src="https://github.com/user-attachments/assets/e5c57147-c039-49e7-b5bc-8cc2cf608b76" />
+
+попробовать подключиться по паролю
+ > mongosh --port 27023 -u shard1_admin -p shard1_admin
+<img width="1470" height="175" alt="image" src="https://github.com/user-attachments/assets/76a1d286-c953-439e-814f-06493b4fd859" />
+
+
+
+
 
 https://maihoangviet.medium.com/hardening-an-existing-mongodb-sharded-cluster-with-keyfile-authentication-20944afd13b1
