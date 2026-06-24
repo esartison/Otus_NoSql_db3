@@ -602,7 +602,7 @@ databases
 
 ## (6) выставить приоритет шардам на сервере mongosserver ##
 
-# shardsvr-01 #
+**shardsvr-01**
 на сервере mongodb1
 
 подключиться к shardsvr-01
@@ -612,18 +612,25 @@ mongosh --port 27021
 
 настроить mongodb1 как главный узел
 >cfg = rs.conf()
->cfg.members[0].priority = 2   // primary priority
+
+>cfg.members[0].priority = 2
+
 >cfg.members[1].priority = 1
+
 >cfg.members[2].priority = 1
+
 >rs.reconfig(cfg)
+
 >rs.stepDown()
+
 >rs.conf().members.forEach(m => print(m.host + " → priority: " + m.priority))
+
 <img width="1147" height="85" alt="image" src="https://github.com/user-attachments/assets/8d597e06-165d-4433-a652-fde98b504ce6" />
 
 
 
 
-# shardsvr-02 #
+**shardsvr-02**
 на сервере mongodb2
 
 подключиться к shardsvr-02
@@ -636,17 +643,24 @@ mongosh --port 27022
 
 настроить mongodb2 как главный узел
 >cfg = rs.conf()
->cfg.members[0].priority = 1   // primary priority
+
+>cfg.members[0].priority = 1
+
 >cfg.members[1].priority = 2
+
 >cfg.members[2].priority = 1
+
 >rs.reconfig(cfg)
+
 >rs.stepDown()
+
 >rs.conf().members.forEach(m => print(m.host + " → priority: " + m.priority))
+
 <img width="1151" height="76" alt="image" src="https://github.com/user-attachments/assets/1f63dd80-3e39-40d8-ab00-f1e5aa9c769b" />
 
 
 
-# shardsvr-03 #
+**shardsvr-03**
 на сервере mongodb3
 
 подключиться к shardsvr-03
@@ -722,7 +736,7 @@ print(`✅ Successfully inserted ${totalDocs} documents into sales.orders`);
 <img width="1007" height="81" alt="image" src="https://github.com/user-attachments/assets/5c60d4d4-0ee2-4f29-b377-36d3dc4e046e" />
 
 
-Проверрить, была ли таблица вообще шардирована
+Проверить, была ли таблица вообще шардирована - все хорошо
 >use config
 >db.collections.find({ _id: "sales.orders" }).pretty()
 <img width="855" height="309" alt="image" src="https://github.com/user-attachments/assets/d4a71a19-afba-4079-a136-56651a8022a5" />
@@ -786,7 +800,7 @@ Totals
 
 
 ## (8) поронять разные инстансы, посмотреть, что будет происходить, поднять обратно. Описать что произошло ##
-с mongodb3 подключился к shardsvr-02 и проверил статус 
+с mongodb3 подключился к shardsvr-02 и проверил статус, primary был на втором узле
 
 ДО
 ```
@@ -804,10 +818,13 @@ rs.status().members.map(m => ({
 <img width="770" height="232" alt="image" src="https://github.com/user-attachments/assets/93c79e43-678b-409e-9eaa-f031386accf9" />
 
 
+
 ПОСЛЕ
 
 <img width="729" height="267" alt="image" src="https://github.com/user-attachments/assets/4933e70d-c169-4b2f-8cb1-b362d7b5da6c" />
+
 Primary переехал на первую голову
+
 
 
 ЗАПУСТИЛ сервер mongodb2 и проверил еще раз статус, primary опять вернулся на mongodb2
